@@ -2,46 +2,62 @@ package com.bloodbank.bloodbank.service;
 
 import com.bloodbank.bloodbank.entity.User;
 import com.bloodbank.bloodbank.repository.UserRepository;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 
-// @Service → Spring ko batata hai
-// yeh class business logic handle karegi
+// UserDetailsService → Spring Security ko batata hai
+// user kaise dhundna hai database se
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 
-    // UserRepository ka object
-    // Isse database se baat karenge
     private UserRepository userRepository;
 
-    // Constructor Injection
-    // Spring khud UserRepository inject karega
-    // Matlab humein manually object nahi banana
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-    // Naya user save karo database mein
+    // Spring Security yeh method khud call karta hai
+    // Jab token verify karta hai
+    @Override
+    public UserDetails loadUserByUsername(String email)
+            throws UsernameNotFoundException {
+
+        // Email se user dhundo
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("User not found: " + email));
+
+        // Spring Security ka User object banao
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
+                user.getPassword(),
+                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
+        );
+    }
+
+    // Naya user save karo
     public User saveUser(User user) {
         return userRepository.save(user);
     }
 
     // Email se user dhundo
-    // Optional → matlab user mil bhi sakta hai
-    // aur nahi bhi — null pointer exception nahi aayega
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
-    // Check karo email pehle se registered hai ya nahi
-    // Registration ke time use hoga
+    // Email exist karti hai ya nahi
     public boolean emailExists(String email) {
         return userRepository.existsByEmail(email);
     }
 
     // Saare users lao
-    public List<User> getAllUsers() {
+    public java.util.List<User> getAllUsers() {
         return userRepository.findAll();
     }
 

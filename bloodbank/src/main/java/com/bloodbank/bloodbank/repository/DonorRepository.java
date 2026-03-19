@@ -10,16 +10,13 @@ import java.util.Optional;
 @Repository
 public interface DonorRepository extends JpaRepository<DonorProfile, Long> {
 
-    // User id se donor profile dhundo
-    // Jab koi donor apni profile dekhna chahe
+    // user.id se dhundo
+    // "user_id" nahi → "user" object ka "id" hai
     Optional<DonorProfile> findByUserId(Long userId);
 
     // Blood group se saare donors dhundo
-    // Emergency mein kaam aayega
-    // "Mujhe saare O+ donors chahiye"
     List<DonorProfile> findByBloodGroup(String bloodGroup);
 
     // City aur blood group se donors dhundo
-    // "Mumbai mein saare A+ donors"
     List<DonorProfile> findByCityAndBloodGroup(String city, String bloodGroup);
 }
