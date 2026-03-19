@@ -38,6 +38,11 @@ public class SecurityConfig {
                         // Register aur Login ke liye token nahi chahiye
                         .requestMatchers("/api/auth/**").permitAll()
 
+                        // /error endpoint free karo
+                        // Spring internally /error use karta hai
+                        // Agar secured rahega toh 403 aayega
+                        .requestMatchers("/error").permitAll()
+
                         // Baaki sab APIs ke liye token chahiye
                         .anyRequest().authenticated()
                 )
@@ -56,7 +61,10 @@ public class SecurityConfig {
 
         return http.build();
     }
-    // Yeh add karo SecurityConfig mein for encrpted paswords
+
+    // BCrypt password encoder bean
+    // Register mein password encrypt hoga
+    // Login mein encrypted se match hoga
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

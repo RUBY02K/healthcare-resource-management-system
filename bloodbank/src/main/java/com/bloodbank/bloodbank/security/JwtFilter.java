@@ -45,8 +45,14 @@ public class JwtFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             // "Bearer " hatao → sirf token lo
             token = authHeader.substring(7);
+
             // Token se email nikalo
-            email = jwtUtil.getEmailFromToken(token);
+            // Try catch lagaya → invalid token pe crash nahi hoga
+            try {
+                email = jwtUtil.getEmailFromToken(token);
+            } catch (Exception e) {
+                // Token invalid hai → email null rahega
+            }
         }
 
         // Final variable banao lambda ke liye
@@ -54,7 +60,8 @@ public class JwtFilter extends OncePerRequestFilter {
         final String finalToken = token;
 
         // Email mili aur abhi authentication nahi hui?
-        if (finalEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (finalEmail != null &&
+                SecurityContextHolder.getContext().getAuthentication() == null) {
 
             // Token valid hai?
             if (jwtUtil.validateToken(finalToken)) {
@@ -74,7 +81,6 @@ public class JwtFilter extends OncePerRequestFilter {
                             );
 
                     // Security context mein set karo
-                    // Matlab → "Yeh user authenticated hai"
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 });
             }
