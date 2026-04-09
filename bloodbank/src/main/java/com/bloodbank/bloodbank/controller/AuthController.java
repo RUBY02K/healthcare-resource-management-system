@@ -1,14 +1,12 @@
-package com.bloodbank.bloodbank.controller;
+ package com.bloodbank.bloodbank.controller;
 
 import com.bloodbank.bloodbank.entity.User;
 import com.bloodbank.bloodbank.security.JwtUtil;
 import com.bloodbank.bloodbank.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,8 +16,6 @@ public class AuthController {
 
     private UserService userService;
     private JwtUtil jwtUtil;
-
-    // PasswordEncoder inject karo
     private PasswordEncoder passwordEncoder;
 
     public AuthController(UserService userService,
@@ -40,9 +36,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(response);
         }
 
-        // Password plain text nahi rahega
-        // BCrypt se encrypt hokar save hoga
-        // "123456" → "$2a$10$xyz..." aisa dikhega database mein
+        // Encrypt password using BCrypt
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userService.saveUser(user);
 
@@ -58,19 +52,21 @@ public class AuthController {
         return userService.findByEmail(user.getEmail())
                 .map(foundUser -> {
 
-                    // passwordEncoder.matches →
-                    // "123456" ko encrypted se compare karega
-                    // Sahi hai → true
-                    // Galat hai → false
                     if (passwordEncoder.matches(
                             user.getPassword(),
                             foundUser.getPassword())) {
 
                         String token = jwtUtil.generateToken(foundUser.getEmail());
+
                         response.put("token", token);
                         response.put("role", foundUser.getRole().toString());
+
+                        // ✅ Added userId here
+                        response.put("userId", foundUser.getId().toString());
+
                         response.put("message", "Login successful!");
                         return ResponseEntity.ok(response);
+
                     } else {
                         response.put("message", "Invalid password!");
                         return ResponseEntity.badRequest().body(response);

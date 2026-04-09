@@ -43,6 +43,7 @@ function Login() {
       // Taaki baad mein use ho sake
       localStorage.setItem('token', response.data.token)
       localStorage.setItem('role', response.data.role)
+      localStorage.setItem('userId', response.data.userId)
 
       // Role ke hisaab se dashboard pe jaao
       if (response.data.role === 'ADMIN') {
