@@ -27,10 +27,17 @@ function BloodInventory() {
 
   const handleAdd = async () => {
     try {
-      await api.post('/api/inventory/add', form)
+      // units ko string se number mein convert karo
+      // Backend integer expect karta hai
+      await api.post('/api/inventory/add', {
+        ...form,
+        units: parseInt(form.units)
+      })
       setMessage('Blood units added successfully!')
       setShowForm(false)
+      // Form reset karo
       setForm({ bloodGroup: 'A+', units: '', expiryDate: '', addedBy: 'Admin' })
+      // Fresh data fetch karo
       fetchInventory()
       setTimeout(() => setMessage(''), 3000)
     } catch (err) {

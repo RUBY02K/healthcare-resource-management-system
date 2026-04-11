@@ -27,15 +27,22 @@ function BloodRequests() {
     } catch (err) { console.log(err) }
   }
 
-  const handleCreate = async () => {
-    try {
-      await api.post(`/api/request/create/${userId}`, form)
-      setMessage('Request created successfully!')
-      setShowForm(false)
-      fetchRequests()
-      setTimeout(() => setMessage(''), 3000)
-    } catch (err) { setMessage('Error creating request!') }
-  }
+ const handleCreate = async () => {
+   try {
+     // units ko string se number mein convert karo
+     await api.post(`/api/request/create/${userId}`, {
+       ...form,
+       units: parseInt(form.units)
+     })
+     setMessage('Request created successfully!')
+     setShowForm(false)
+     // Fresh data fetch karo
+     fetchRequests()
+     setTimeout(() => setMessage(''), 3000)
+   } catch (err) {
+     setMessage('Error creating request!')
+   }
+ }
 
   const handleApprove = async (id) => {
     try {
